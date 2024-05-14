@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 @MainActor
 final class AppState: ObservableObject {
@@ -86,8 +87,34 @@ final class AppState: ObservableObject {
 			statusItemButton.contentTintColor = nil
 		}
 	}
+	
+	private func initCamera() {
+		switch AVCaptureDevice.authorizationStatus(for: .video) {
+			case .authorized: // The user has previously granted access to the camera.
+				// disabled because I have no idea what I'm doing (+ added a return)
+				// self.setupCaptureSession()
+				return
+			
+			case .notDetermined: // The user has not yet been asked for camera access.
+				AVCaptureDevice.requestAccess(for: .video) { granted in
+					if granted {
+						// disabled because I have no idea what I'm doing:
+						// self.setupCaptureSession()
+					}
+				}
+			
+			case .denied: // The user has previously denied access.
+				return
+
+
+			case .restricted: // The user can't grant access due to restrictions.
+				return
+		}
+	}
 
 	private init() {
+		initCamera()
+
 		DispatchQueue.main.async { [self] in
 			didLaunch()
 		}
